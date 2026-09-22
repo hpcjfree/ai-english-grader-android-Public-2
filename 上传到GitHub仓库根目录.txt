@@ -1,0 +1,1 @@
+上传 GitHub 时，请把本目录中的内容直接放到仓库根目录。GitHub 必须能看到：.github/workflows/build-apk.yml

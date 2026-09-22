@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6750a4">
+<title>作文智批 · AI 英语作文批改</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body data-device="desktop">
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-copy"><b>作文智批</b><span>AI English Grader</span></div>
+    </div>
+    <nav id="nav" aria-label="主导航">
+      <button data-page="grade" class="active"><span class="nav-icon">✎</span><span>批改</span></button>
+      <button data-page="history"><span class="nav-icon">◷</span><span>历史</span></button>
+      <button data-page="schemes"><span class="nav-icon">☷</span><span>批改微调</span></button>
+      <button data-page="styles"><span class="nav-icon">✦</span><span>风格学习</span></button>
+      <button data-page="settings"><span class="nav-icon">⚙</span><span>设置</span></button>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="device-pill" id="deviceTag">电脑界面</span>
+      <small>Android · 本机</small>
+    </div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow" id="pageEyebrow">WORKSPACE</div>
+        <h1 id="pageTitle">作文批改</h1>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="themeToggle" title="切换明暗主题" aria-label="切换明暗主题">◐</button>
+        <div class="status-chip"><span class="status-dot"></span><span>手机本机</span></div>
+      </div>
+    </header>
+
+    <main>
+      <section id="page-grade" class="page active">
+        <div class="hero-card" id="groupCreate">
+          <div class="hero-copy">
+            <span class="hero-kicker">NEW GRADING SESSION</span>
+            <h2>开始一次新的作文批改</h2>
+            <p>设置题目、评分方案和教师风格，然后连续拍照批改学生作文。</p>
+          </div>
+          <div class="surface form-surface">
+            <div class="grid2">
+              <label><span>批改名称</span><input id="gName" placeholder="例如：九年级 Unit 3 作文"></label>
+              <label><span>微调方案</span><select id="gScheme"></select></label>
+            </div>
+            <label><span>题目内容</span><textarea id="gQuestion" rows="4" placeholder="输入题目，或使用拍照让 AI 提取"></textarea></label>
+            <div class="action-row">
+              <label class="tonal-btn fileBtn"><span>📷</span> 拍照 / 上传题目<input id="qFiles" type="file" accept="image/*" multiple capture="environment"></label>
+              <button class="tonal-btn" id="ocrQuestion">✦ AI 提取题目</button><span class="inline-status" id="qStatus"></span>
+            </div>
+            <label class="switch-row"><input id="hasSample" type="checkbox"><span class="switch-ui"></span><span><b>使用范文</b><small>默认关闭，可输入文字或拍照提取</small></span></label>
+            <div id="sampleBox" class="inset-box hidden">
+              <label><span>范文</span><textarea id="gSample" rows="4"></textarea></label>
+              <div class="action-row"><label class="tonal-btn fileBtn">📷 拍照 / 上传范文<input id="sFiles" type="file" accept="image/*" multiple capture="environment"></label><button class="tonal-btn" id="ocrSample">✦ AI 提取范文</button></div>
+            </div>
+            <label><span>批改风格</span><select id="gStyle"><option value="">默认风格</option></select></label>
+            <button class="primary big" id="createGroup"><span>开始批改</span><b>→</b></button>
+          </div>
+        </div>
+
+        <div class="surface grading-surface hidden" id="gradingMode">
+          <div class="section-head gradingHead">
+            <div><span class="section-kicker">LIVE GRADING</span><h2 id="activeGroupName">批改中</h2><p>短按拍照继续下一份；无下一份时长按 5 秒结束。</p></div>
+            <button class="text-btn" id="leaveSession">退出批改</button>
+          </div>
+          <div class="gradingGrid">
+            <div class="cameraCard">
+              <input id="essayFiles" type="file" accept="image/*" multiple capture="environment">
+              <button type="button" class="cameraBtn" id="cameraBtn" aria-label="拍照批改下一份">
+                <span class="camera-icon">▣</span><span>拍照批改</span><small id="holdHint">长按 5 秒结束</small><i class="hold-ring"></i>
+              </button>
+              <div id="gradeStatus" class="working-status"></div>
+            </div>
+            <div id="resultBox" class="resultBox empty"><div class="empty-state"><span>✦</span><b>等待第一份作文</b><small>拍照后，分数与修改建议会显示在这里</small></div></div>
+          </div>
+        </div>
+
+        <div class="surface">
+          <div class="section-head"><div><span class="section-kicker">SESSIONS</span><h2>批改组</h2></div></div>
+          <div id="groupList" class="cards"></div>
+        </div>
+      </section>
+
+      <section id="page-history" class="page">
+        <div class="surface"><div class="section-head"><div><span class="section-kicker">ARCHIVE</span><h2>历史记录</h2><p>按最近批改顺序显示作文照片。</p></div></div><div id="historyList" class="photoCards"></div></div>
+        <div id="historyDetail" class="surface hidden"></div>
+      </section>
+
+      <section id="page-schemes" class="page">
+        <div class="surface">
+          <div class="section-head"><div><span class="section-kicker">RUBRIC TUNING</span><h2>批改微调方案</h2><p>把评分标准、给分倾向和特殊要求保存成可复用方案。</p></div></div>
+          <div class="grid2"><label><span>方案名称</span><input id="scName" placeholder="例如：中考一模严格版"></label><label><span>评分倾向</span><select id="scStrict"><option value="strict">严格</option><option value="default" selected>默认</option><option value="lenient">宽松</option></select></label></div>
+          <label><span>评分标准</span><textarea id="scRubric" rows="5" placeholder="输入评分标准，或拍照提取"></textarea></label>
+          <div class="action-row"><label class="tonal-btn fileBtn">📷 拍照 / 上传评分标准<input id="rubricFiles" type="file" accept="image/*" multiple capture="environment"></label><button class="tonal-btn" id="ocrRubric">✦ AI 提取评分标准</button></div>
+          <div class="settings-row">
+            <label class="switch-row compact"><input id="scZero" type="checkbox" checked><span class="switch-ui"></span><span><b>允许 0 分</b><small>关闭后要求 AI 避免给出零分</small></span></label>
+            <label class="slider-field"><span>遵守评分标准程度 <b id="adhVal">8</b>/10</span><input id="scAdh" type="range" min="0" max="10" value="8"></label>
+          </div>
+          <label><span>其他批改要求</span><textarea id="scExtra" rows="4" placeholder="例如：重点关注时态和连接词；不要求高级词汇"></textarea></label>
+          <button id="saveScheme" class="primary">保存新方案</button>
+        </div>
+        <div class="surface"><div id="schemeList" class="cards"></div></div>
+      </section>
+
+      <section id="page-styles" class="page">
+        <div class="surface">
+          <div class="section-head"><div><span class="section-kicker">TEACHER CALIBRATION</span><h2>批改风格学习</h2><p>用教师已经人工评分的作文，让 AI 学习你的给分尺度。</p></div></div>
+          <div class="grid2"><label><span>风格名称</span><input id="stName" placeholder="例如：王老师平时评分"></label><label><span>满分</span><input id="stFull" type="number" min="1" value="20"></label></div>
+          <button id="newStyle" class="primary">新建风格</button>
+        </div>
+        <div id="styleTrainer" class="surface hidden">
+          <div class="section-head"><div><span class="section-kicker">LEARNING</span><h2 id="trainerTitle"></h2><p>每次上传一份已知教师分数的作文；最后点击“总结并记忆”。</p></div></div>
+          <div class="grid2"><label><span>老师给分</span><input id="exScore" type="number" step="0.5"></label><label class="drop-field"><span>作文照片</span><span class="tonal-btn fileBtn tall">📷 拍照 / 选择作文<input id="exFile" type="file" accept="image/*" capture="environment"></span></label></div>
+          <div class="action-row"><button id="addExample" class="tonal-btn">添加这个样例</button><button id="finalizeStyle" class="primary">✦ 总结并记忆</button></div><pre id="trainStatus" class="summary-box"></pre>
+        </div>
+        <div class="surface"><div id="styleList" class="cards"></div></div>
+      </section>
+
+      <section id="page-settings" class="page">
+        <div class="surface">
+          <div class="section-head"><div><span class="section-kicker">MODEL</span><h2>AI 模型设置</h2><p>兼容 OpenAI Chat Completions 格式，视觉模型为必需。DeepSeek 官方视觉模型请使用 <b>deepseek-flash</b>。</p></div></div>
+          <div class="grid2"><label><span>模型提供商</span><input id="setProvider" value="DeepSeek"></label><label><span>视觉模型</span><input id="setModel" value="deepseek-flash"></label></div>
+          <label><span>OpenAI 兼容 Base URL</span><input id="setUrl" value="https://api.deepseek.com"></label>
+          <label><span>API Key</span><input id="setKey" type="password" placeholder="已保存时显示 ********"></label>
+          <div class="grid3"><label><span>Temperature</span><input id="setTemp" type="number" min="0" max="2" step="0.1" value="0.2"></label><label><span>Max tokens</span><input id="setMax" type="number" value="4000"></label><label><span>超时（秒）</span><input id="setTimeout" type="number" value="120"></label></div>
+        </div>
+
+        <div class="surface">
+          <div class="section-head"><div><span class="section-kicker">NETWORK</span><h2>网络与代理</h2><p>默认使用直连；如有需要也可配置 HTTP / SOCKS5 代理，可避免未知 SOCKS scheme 报错。</p></div></div>
+          <div class="proxy-options" id="proxyOptions">
+            <label class="choice-card"><input type="radio" name="proxyMode" value="direct" checked><span><b>直连</b><small>推荐 · 忽略 HTTP_PROXY / ALL_PROXY</small></span></label>
+            <label class="choice-card"><input type="radio" name="proxyMode" value="system"><span><b>系统代理</b><small>读取应用进程代理变量，并自动兼容 socks://</small></span></label>
+            <label class="choice-card"><input type="radio" name="proxyMode" value="custom"><span><b>自定义代理</b><small>HTTP / HTTPS / SOCKS5</small></span></label>
+          </div>
+          <label id="proxyUrlField" class="hidden"><span>自定义代理地址</span><input id="setProxyUrl" placeholder="例如：http://127.0.0.1:7890 或 socks5://127.0.0.1:7890"></label>
+          <div id="proxyStatus" class="info-banner">当前：直连（忽略系统代理）</div>
+          <div class="action-row"><button id="saveSettings" class="primary">保存设置</button><button id="testVision" class="tonal-btn">测试视觉模型</button><span id="testStatus" class="inline-status test-status"></span></div>
+        </div>
+
+        <div class="surface">
+          <div class="section-head"><div><span class="section-kicker">USAGE</span><h2>Token 使用量</h2></div></div>
+          <div id="usage" class="stats"></div><div class="note">Token 以模型 API 返回的 usage 为准；部分兼容服务不返回 usage 时可能显示 0。</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
